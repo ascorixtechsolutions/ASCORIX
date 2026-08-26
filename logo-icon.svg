@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="120 40 500 450" width="100%" height="100%">
+  <!-- Definitions of Gradients -->
+  <defs>
+    <!-- Left Triangle Gradient (Blue to Cyan) -->
+    <linearGradient id="blueCyanGradIcon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0052D4"/>
+      <stop offset="50%" stop-color="#4364F7"/>
+      <stop offset="100%" stop-color="#00C9FF"/>
+    </linearGradient>
+    
+    <!-- Right Triangle Gradient (Gold to Orange) -->
+    <linearGradient id="goldOrangeGradIcon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F2994A"/>
+      <stop offset="100%" stop-color="#F2C94C"/>
+    </linearGradient>
+
+    <!-- Infinity Left (Blue/Cyan) -->
+    <linearGradient id="infLeftGradIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0052D4"/>
+      <stop offset="100%" stop-color="#00C9FF"/>
+    </linearGradient>
+    
+    <!-- Infinity Right (Green/Lime) -->
+    <linearGradient id="infRightGradIcon" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#84CC16"/>
+    </linearGradient>
+  </defs>
+
+  <g id="logo-icon" transform="translate(0, -20)">
+    <!-- 1. The Upper Triangle/Arrow -->
+    <!-- Left Face of Triangle -->
+    <path d="M 400, 100 L 250, 350 L 400, 310 Z" fill="url(#blueCyanGradIcon)" />
+    <!-- Right Face of Triangle -->
+    <path d="M 400, 100 L 400, 310 L 550, 350 Z" fill="url(#goldOrangeGradIcon)" />
+
+    <!-- 2. Inside the Triangle: Golden 4-point Star -->
+    <path d="M 400, 195 Q 400, 220 375, 220 Q 400, 220 400, 245 Q 400, 220 425, 220 Q 400, 220 400, 195" fill="#F2C94C" filter="drop-shadow(0px 0px 8px rgba(242, 201, 76, 0.8))" />
+
+    <!-- 3. Left Infinity Loop (Cyan/Blue Ribbon) -->
+    <path d="M 400, 310 
+             C 310, 220 180, 250 180, 350 
+             C 180, 450 310, 480 400, 390 
+             C 440, 350 470, 310 520, 290" 
+          fill="none" stroke="url(#infLeftGradIcon)" stroke-width="36" stroke-linecap="round" />
+    
+    <!-- Decorative tech circuit lines / floating pixel squares on left loop -->
+    <rect x="135" y="320" width="12" height="12" fill="#00C9FF" opacity="0.8" />
+    <rect x="155" y="295" width="8" height="8" fill="#00C9FF" opacity="0.6" />
+    <rect x="175" y="280" width="10" height="10" fill="#4364F7" opacity="0.7" />
+    <rect x="145" y="350" width="14" height="14" fill="#0052D4" opacity="0.9" />
+    <circle cx="215" cy="395" r="5" fill="#FFFFFF" />
+    <circle cx="245" cy="425" r="4" fill="#00C9FF" />
+    
+    <!-- 4. Right Infinity Loop (Green Ribbon curving to Arrow) -->
+    <path d="M 370, 395 
+             C 430, 455 560, 450 560, 350 
+             C 560, 250 460, 240 400, 310" 
+          fill="none" stroke="url(#infRightGradIcon)" stroke-width="36" stroke-linecap="round" />
+    
+    <!-- Arrow tip on green loop -->
+    <path d="M 525, 230 L 610, 230 L 590, 310 Z" fill="#84CC16" />
+
+    <!-- 5. Growing bars (inside right loop) -->
+    <rect x="450" y="380" width="16" height="40" rx="3" fill="#10B981" />
+    <rect x="478" y="355" width="16" height="65" rx="3" fill="#10B981" />
+    <rect x="506" y="330" width="16" height="90" rx="3" fill="#10B981" />
+  </g>
+</svg>

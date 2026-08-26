@@ -1,0 +1,28 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Local application data
+data/*.json
+!data/.gitkeep
+
+# User uploads
+uploads/*
+!uploads/.gitkeep
+!uploads/projects/.gitkeep
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# AI IDE / temporary files
+brain/
+scratch/

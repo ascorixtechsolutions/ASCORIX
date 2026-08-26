@@ -1,0 +1,34 @@
+﻿# robots.txt - ASCORIX TECH SOLUTIONS
+# Generated for global SEO visibility
+
+# Allow all major search engines
+User-agent: *
+Allow: /
+
+# Block admin, API, and sensitive directories from being indexed
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /data/
+Disallow: /brain/
+Disallow: /scratch/
+Disallow: /node_modules/
+
+# Google-specific bot
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /node_modules/
+
+# Bing bot
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /uploads/
+Disallow: /node_modules/
+
+# Sitemap location
+Sitemap: https://www.ascorixtechsolutions.com/sitemap.xml

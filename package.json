@@ -1,0 +1,23 @@
+{
+  "name": "ascorix",
+  "version": "1.0.0",
+  "description": "Premium Enterprise Software & IT Architectures",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step required for Node.js Express server'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
+    "adm-zip": "^0.5.18",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-fileupload": "^1.5.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.1",
+    "nodemailer": "^9.0.1"
+  }
+}
