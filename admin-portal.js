@@ -4,6 +4,7 @@ window.db = db;
 // admin-portal.js — ASCORIX BMS Main Orchestrator
 // Handles auth, routing, sidebar, modals, toast, and cross-module data
 
+const bmsChannel = new BroadcastChannel("ascorix_bms");
 const BMS = {
   token: null,
   user: null,
@@ -14,8 +15,8 @@ const BMS = {
   invoices: [],
 
   async init() {
-    this.token = localStorage.getItem('ascorix_token');
-    const userStr = localStorage.getItem('ascorix_user');
+    this.token = localStorage.getItem('ascorix_admin_token') || localStorage.getItem('ascorix_token');
+    const userStr = localStorage.getItem('ascorix_admin_user') || localStorage.getItem('ascorix_user');
 
     if (this.token && userStr) {
       try {
@@ -292,16 +293,17 @@ const BMS = {
   },
 
   logout() {
-    localStorage.removeItem('ascorix_token');
-    localStorage.removeItem('ascorix_user');
-    window.location.href = '/';
+    localStorage.removeItem('ascorix_admin_token');
+    localStorage.removeItem('ascorix_admin_user');
+    window.location.href = '/admin';
   },
 
   startHeartbeat() {
     setInterval(async () => {
       try {
+        const token = this.token || localStorage.getItem('ascorix_admin_token') || localStorage.getItem('ascorix_token');
         const r = await fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${this.token}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         if (r.status === 404 || r.status === 403 || r.status === 401) {
           this.logout();
@@ -339,9 +341,10 @@ const BMS = {
   // API HELPER
   // ==========================================
   async apiFetch(url, options = {}) {
+    const token = this.token || localStorage.getItem('ascorix_admin_token') || localStorage.getItem('ascorix_token');
     const headers = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${this.token}`,
+      'Authorization': `Bearer ${token}`,
       ...(options.headers || {})
     };
     const res = await fetch(url, { ...options, headers });
@@ -901,6 +904,8 @@ const BMS = {
     document.getElementById('serviceTitle').value = s.title;
     document.getElementById('serviceCategory').value = s.category;
     document.getElementById('serviceCost').value = s.cost;
+    document.getElementById('serviceOriginalPrice').value = s.original_price || '';
+    document.getElementById('serviceDiscountPercent').value = s.discount_percent || '';
 
     // Parse description for General, Included, and Not Included parts
     const desc = s.description || '';
@@ -949,6 +954,8 @@ const BMS = {
     const title = document.getElementById('serviceTitle').value.trim();
     const category = document.getElementById('serviceCategory').value.trim();
     const cost = document.getElementById('serviceCost').value.trim();
+    const original_price = document.getElementById('serviceOriginalPrice').value;
+    const discount_percent = document.getElementById('serviceDiscountPercent').value;
 
     const general = document.getElementById('serviceDesc').value.trim();
     const includedLines = document.getElementById('serviceIncluded').value.split('\n').map(l => l.trim()).filter(Boolean);
@@ -969,6 +976,8 @@ const BMS = {
       title,
       category,
       cost,
+      original_price: original_price ? Number(original_price) : undefined,
+      discount_percent: discount_percent ? Number(discount_percent) : undefined,
       description: compiledDesc
     };
     try {
@@ -980,6 +989,7 @@ const BMS = {
       BMS.showToast('Service saved', 'success');
       BMS.closeModal('serviceModal');
       BMS.loadServices();
+      bmsChannel.postMessage("services_updated");
     } catch (err) { BMS.showToast(err.message, 'error'); }
   },
 
@@ -989,6 +999,7 @@ const BMS = {
         await BMS.apiFetch(`/api/services/${id}`, { method: 'DELETE' });
         BMS.showToast('Service deleted', 'success');
         BMS.loadServices();
+        bmsChannel.postMessage("services_updated");
       } catch (err) { BMS.showToast(err.message, 'error'); }
     });
   },
@@ -1228,7 +1239,6 @@ const BMS = {
               width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
               background: ${isActive ? '#f87171' : '#34d399'};
               box-shadow: 0 0 0 4px ${isActive ? 'rgba(248,113,113,0.2)' : 'rgba(52,211,153,0.2)'};
-              animation: maintPulse 2s infinite;
             "></div>
           </div>
 
@@ -1303,12 +1313,6 @@ const BMS = {
 
         </div>
 
-        <style>
-          @keyframes maintPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.25); opacity: 0.6; }
-          }
-        </style>
       `;
 
       // Wire up toggle visual
@@ -1404,7 +1408,7 @@ const BMS = {
 
     const overlay = document.createElement('div');
     overlay.id = 'maintPreviewOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at 50% 0%,#0f1b3d 0%,#060c1a 60%,#030610 100%);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#f0f4ff 0%,#e8f0fe 50%,#f1f5f9 100%);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Inter,sans-serif;';
     overlay.innerHTML = `
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(99,179,237,0.2);border-radius:20px;padding:48px 40px;max-width:520px;width:100%;text-align:center;backdrop-filter:blur(12px);box-shadow:0 25px 80px rgba(0,0,0,0.5);position:relative;">
         <button onclick="document.getElementById('maintPreviewOverlay').remove()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">✕ Close Preview</button>

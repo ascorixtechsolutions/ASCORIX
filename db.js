@@ -2,7 +2,7 @@
 
 // Retrieve auth headers automatically if token exists
 function getHeaders(extraHeaders = {}) {
-  const token = localStorage.getItem("ascorix_token");
+  const token = localStorage.getItem("ascorix_admin_token") || localStorage.getItem("ascorix_token");
   const headers = {
     "Content-Type": "application/json",
     ...extraHeaders
@@ -36,6 +36,13 @@ async function apiRequest(url, method = "GET", body = null) {
     throw err;
   }
 }
+
+const bmsChannel = new BroadcastChannel("ascorix_bms");
+bmsChannel.onmessage = (e) => {
+  if (e.data === "services_updated") {
+    window.dispatchEvent(new CustomEvent("ascorix_services_updated"));
+  }
+};
 
 export const db = {
   // ==========================================
@@ -73,9 +80,9 @@ export const db = {
   async adminLogin(email, password) {
     const result = await apiRequest("/api/auth/admin/login", "POST", { email, password });
     if (result.token) {
-      localStorage.setItem("ascorix_token", result.token);
-      localStorage.setItem("ascorix_user", JSON.stringify(result.user));
-      window.dispatchEvent(new CustomEvent("ascorix_auth_state_changed"));
+      localStorage.setItem("ascorix_admin_token", result.token);
+      localStorage.setItem("ascorix_admin_user", JSON.stringify(result.user));
+      window.dispatchEvent(new CustomEvent("ascorix_admin_auth_state_changed"));
     }
     return result;
   },
@@ -84,6 +91,25 @@ export const db = {
     localStorage.removeItem("ascorix_token");
     localStorage.removeItem("ascorix_user");
     window.dispatchEvent(new CustomEvent("ascorix_auth_state_changed"));
+  },
+
+  adminLogout() {
+    localStorage.removeItem("ascorix_admin_token");
+    localStorage.removeItem("ascorix_admin_user");
+    window.dispatchEvent(new CustomEvent("ascorix_admin_auth_state_changed"));
+  },
+
+  getAdminUser() {
+    try {
+      const userStr = localStorage.getItem("ascorix_admin_user");
+      return userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  getAdminToken() {
+    return localStorage.getItem("ascorix_admin_token");
   },
 
   getCurrentUser() {

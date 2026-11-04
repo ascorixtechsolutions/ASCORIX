@@ -26,17 +26,22 @@ export function getDynamicCategories(allServices, customCategories = []) {
   const categoryMetadata = {
     "Website Development": {
       id: "web-dev",
-      description: "AI-Powered responsive corporate websites, landing pages, and web engineering solutions built to convert visitors.",
+      description: "High-performance responsive corporate websites, custom landing pages, and web applications engineered to convert visitors.",
       icon: "code"
     },
     "Digital Marketing": {
       id: "digital-marketing",
-      description: "Professional monthly social content management, captions, targeted hashtags, and reels to scale branding.",
+      description: "Strategic monthly social content management, copywriting, targeted campaigns, and media production to scale your brand.",
       icon: "cloud"
     },
     "AI Automation": {
       id: "ai-automation",
-      description: "WhatsApp auto-responses, lead collection sheet integration, Instagram replies, and CRM workflow automation.",
+      description: "Custom WhatsApp auto-responders, automated lead capture pipelines, and seamless CRM workflow integrations.",
+      icon: "cpu"
+    },
+    "Business Automation": {
+      id: "business-automation",
+      description: "Custom WhatsApp auto-responders, automated lead capture pipelines, and seamless CRM workflow integrations.",
       icon: "cpu"
     },
     "Google Business Profile": {
@@ -263,7 +268,7 @@ export async function renderServices() {
           }
 
           // Open auth portal modal
-          const authBtn = document.getElementById("auth-portal-btn");
+          const authBtn = document.getElementById("auth-signup-btn") || document.getElementById("auth-signin-btn") || document.getElementById("auth-portal-btn");
           if (authBtn) {
             authBtn.click();
           }

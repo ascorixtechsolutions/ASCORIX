@@ -7,6 +7,8 @@ const path = require('path');
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_CONFIG_PATH = path.join(DATA_DIR, 'dbConfig.json');
 let isMongoConnected = false;
+let isMysqlConnected = false;
+let mysqlPool = null;
 
 function loadDbConfig() {
   if (fs.existsSync(DB_CONFIG_PATH)) {
@@ -22,6 +24,15 @@ function getDbConfig() {
     return { provider: 'supabase', supabaseUrl: process.env.SUPABASE_URL, supabaseKey: process.env.SUPABASE_KEY };
   } else if (envProvider === 'mongodb' && process.env.MONGODB_URI) {
     return { provider: 'mongodb', mongoUri: process.env.MONGODB_URI };
+  } else if (envProvider === 'mysql') {
+    return { 
+      provider: 'mysql', 
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT || 3306,
+      database: process.env.DB_NAME,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD
+    };
   } else if (envProvider === 'local') {
     return { provider: 'local' };
   }
@@ -45,7 +56,9 @@ async function updateDbConfig(configObj) {
   }
   isMongoConnected = false;
   isSupabaseConnected = false;
+  isMysqlConnected = false;
   supabase = null;
+  mysqlPool = null;
   
   await dbConnect();
 }
@@ -168,6 +181,34 @@ const DEFAULT_PORTFOLIO = [
     image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80"
   }
 ];
+
+// ==========================================
+// MYSQL CONNECTION & ABSTRACTION (PREPARATION)
+// ==========================================
+// Note: This block is prepared for the upcoming Hostinger MySQL migration.
+// Once you switch DB_PROVIDER=mysql in .env, this pool will be initialized.
+// You will need to run: npm install mysql2
+// let mysqlPool = null;
+// let isMysqlConnected = false;
+
+// async function initMysql() {
+//   const config = getDbConfig();
+//   if (config.provider === 'mysql' && !isMysqlConnected) {
+//     const mysql = require('mysql2/promise');
+//     mysqlPool = mysql.createPool({
+//       host: config.host,
+//       port: config.port,
+//       user: config.user,
+//       password: config.password,
+//       database: config.database,
+//       waitForConnections: true,
+//       connectionLimit: 10,
+//       queueLimit: 0
+//     });
+//     isMysqlConnected = true;
+//     console.log("SUCCESS: Connected to Hostinger MySQL Database.");
+//   }
+// }
 
 // ==========================================
 // MONGODB SCHEMAS & MODELS
@@ -1814,8 +1855,24 @@ async function dbConnect() {
       await LocalDB.Settings.findOne();
       await LocalDB.OfferCodes.find();
     }
+  } else if (provider === 'mysql' && config.host && config.database) {
+    try {
+      console.log("Attempting database sync with Hostinger MySQL Database...");
+      // await initMysql(); // Will be enabled during actual migration
+      console.log("SUCCESS (Mock): Connected to Hostinger MySQL Database.");
+      isMysqlConnected = true;
+      // MysqlModels will be returned from db()
+    } catch (err) {
+      console.warn("DATABASE ERROR: MySQL connection failed. Cause:", err.message);
+      console.warn("FALLBACK ENABLED: Loading server-side local storage engine.");
+      isMysqlConnected = false;
+      await LocalDB.Services.find();
+      await LocalDB.Portfolio.find();
+      await LocalDB.Settings.findOne();
+      await LocalDB.OfferCodes.find();
+    }
   } else {
-    console.log("CONFIG NOTICE: SUPABASE or MONGODB credentials not detected in environment.");
+    console.log("CONFIG NOTICE: External DB credentials not detected in environment.");
     console.log("FALLBACK ENABLED: Loading server-side local storage engine.");
     isMongoConnected = false;
     isSupabaseConnected = false;
@@ -1834,7 +1891,9 @@ module.exports = {
   getSupabase: () => supabase,
   isSupabaseConnected: () => isSupabaseConnected,
   isMongoConnected: () => isMongoConnected,
+  isMysqlConnected: () => isMysqlConnected,
   db: () => {
+    // if (isMysqlConnected) return MysqlModels; // To be implemented
     if (isSupabaseConnected) return SupabaseModels;
     return isMongoConnected ? MongoModels : LocalDB;
   }

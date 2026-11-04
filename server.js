@@ -728,15 +728,18 @@ app.post('/api/services', authMiddleware, adminMiddleware('manage_services'), as
 app.put('/api/services/:id', authMiddleware, adminMiddleware('manage_services'), async (req, res) => {
   try {
     const { title, description, cost, category, icon, original_price, discount_percent, discount_reason } = req.body;
-    const updated = await db().Services.findByIdAndUpdate(req.params.id, {
-      title, description, cost, category, icon,
-      original_price: Number(original_price) || 0,
-      discount_percent: Number(discount_percent) || 0,
-      discount_reason: discount_reason || ''
-    });
-    if (!updated) {
+    const existing = await db().Services.findById(req.params.id);
+    if (!existing) {
       return res.status(404).json({ error: "Service listing not found." });
     }
+    
+    const updated = await db().Services.findByIdAndUpdate(req.params.id, {
+      title, description, cost, category, icon,
+      original_price: original_price !== undefined ? Number(original_price) : existing.original_price,
+      discount_percent: discount_percent !== undefined ? Number(discount_percent) : existing.discount_percent,
+      discount_reason: discount_reason !== undefined ? discount_reason : existing.discount_reason
+    }, { new: true });
+    
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
